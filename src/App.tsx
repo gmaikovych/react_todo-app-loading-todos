@@ -6,11 +6,12 @@ import { USER_ID } from './api/todos';
 import { TodoList } from './components/TodoList';
 import { Todo } from './types/Todo';
 import { getTodos } from './services/post.service';
+import classNames from 'classnames';
 
 export const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [errorMessage, setErrorMessage] = useState('');
-  const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
+  const [filter, setFilter] = useState('all');
 
   const visibleTodos = todos.filter(todo => {
     if (filter === 'active') {
@@ -49,7 +50,9 @@ export const App: React.FC = () => {
         <header className="todoapp__header">
           <button
             type="button"
-            className={`todoapp__toggle-all ${todos.length > 0 && todos.every(todo => todo.completed) ? 'active' : ''}`}
+            className={classNames('todoapp__toggle-all', {
+              active: todos.length > 0 && todos.every(todo => todo.completed),
+            })}
             data-cy="ToggleAllButton"
           />
 
@@ -73,41 +76,22 @@ export const App: React.FC = () => {
             </span>
 
             <nav className="filter" data-cy="Filter">
-              <a
-                href="#/"
-                className={`filter__link ${filter === 'all' ? 'selected' : ''}`}
-                data-cy="FilterLinkAll"
-                onClick={e => {
-                  e.preventDefault();
-                  setFilter('all');
-                }}
-              >
-                All
-              </a>
-
-              <a
-                href="#/active"
-                className={`filter__link ${filter === 'active' ? 'selected' : ''}`}
-                data-cy="FilterLinkActive"
-                onClick={e => {
-                  e.preventDefault();
-                  setFilter('active');
-                }}
-              >
-                Active
-              </a>
-
-              <a
-                href="#/completed"
-                className={`filter__link ${filter === 'completed' ? 'selected' : ''}`}
-                data-cy="FilterLinkCompleted"
-                onClick={e => {
-                  e.preventDefault();
-                  setFilter('completed');
-                }}
-              >
-                Completed
-              </a>
+              {['all', 'active', 'completed'].map(type => (
+                <a
+                  key={type}
+                  href={`#/${type === 'all' ? '' : type}`}
+                  className={classNames('filter__link', {
+                    selected: filter === type,
+                  })}
+                  data-cy={`FilterLink${type.charAt(0).toUpperCase() + type.slice(1)}`}
+                  onClick={e => {
+                    e.preventDefault();
+                    setFilter(type);
+                  }}
+                >
+                  {type.charAt(0).toUpperCase() + type.slice(1)}
+                </a>
+              ))}
             </nav>
 
             <button
@@ -124,7 +108,13 @@ export const App: React.FC = () => {
 
       <div
         data-cy="ErrorNotification"
-        className={`notification is-danger is-light has-text-weight-normal ${errorMessage === '' ? 'hidden' : ''}`}
+        className={classNames(
+          'notification',
+          'is-danger',
+          'is-light',
+          'has-text-weight-normal',
+          { hidden: errorMessage === '' },
+        )}
       >
         <button
           data-cy="HideErrorButton"

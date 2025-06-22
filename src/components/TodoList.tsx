@@ -3,6 +3,7 @@
 
 import React from 'react';
 import { Todo } from '../types/Todo';
+import classNames from 'classnames';
 
 type Props = {
   todos: Todo[];
@@ -14,7 +15,7 @@ export const TodoList: React.FC<Props> = ({ todos }) => (
       {todos.map(todo => (
         <div
           data-cy="Todo"
-          className={`todo ${todo.completed ? 'completed' : ''}`}
+          className={classNames('todo', { completed: todo.completed })}
           key={todo.id}
         >
           <label className="todo__status-label">
