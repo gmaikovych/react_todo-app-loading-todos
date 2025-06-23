@@ -1,24 +1,25 @@
-/* eslint-disable jsx-a11y/label-has-associated-control */
-/* eslint-disable jsx-a11y/control-has-associated-label */
 import React, { useState, useEffect } from 'react';
+import classNames from 'classnames';
 import { UserWarning } from './UserWarning';
 import { USER_ID } from './api/todos';
-import { TodoList } from './components/TodoList';
 import { Todo } from './types/Todo';
 import { getTodos } from './services/post.service';
-import classNames from 'classnames';
+import { Header } from './components/Header';
+import { TodoList } from './components/TodoList';
+import { Footer } from './components/Footer'; // Import the new Footer component
+import { TodoFilter } from './types/TodoFilter'; // Import the TodoFilter enum
 
 export const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [errorMessage, setErrorMessage] = useState('');
-  const [filter, setFilter] = useState('all');
+  const [filter, setFilter] = useState<TodoFilter>(TodoFilter.All);
 
   const visibleTodos = todos.filter(todo => {
-    if (filter === 'active') {
+    if (filter === TodoFilter.Active) {
       return !todo.completed;
     }
 
-    if (filter === 'completed') {
+    if (filter === TodoFilter.Completed) {
       return todo.completed;
     }
 
@@ -47,62 +48,12 @@ export const App: React.FC = () => {
       <h1 className="todoapp__title">todos</h1>
 
       <div className="todoapp__content">
-        <header className="todoapp__header">
-          <button
-            type="button"
-            className={classNames('todoapp__toggle-all', {
-              active: todos.length > 0 && todos.every(todo => todo.completed),
-            })}
-            data-cy="ToggleAllButton"
-          />
-
-          {/* Add a todo on form submit */}
-          <form>
-            <input
-              data-cy="NewTodoField"
-              type="text"
-              className="todoapp__new-todo"
-              placeholder="What needs to be done?"
-            />
-          </form>
-        </header>
+        <Header todos={todos} />
 
         <TodoList todos={visibleTodos} />
 
         {todos.length !== 0 && (
-          <footer className="todoapp__footer" data-cy="Footer">
-            <span className="todo-count" data-cy="TodosCounter">
-              {todos.filter(todo => !todo.completed).length} items left
-            </span>
-
-            <nav className="filter" data-cy="Filter">
-              {['all', 'active', 'completed'].map(type => (
-                <a
-                  key={type}
-                  href={`#/${type === 'all' ? '' : type}`}
-                  className={classNames('filter__link', {
-                    selected: filter === type,
-                  })}
-                  data-cy={`FilterLink${type.charAt(0).toUpperCase() + type.slice(1)}`}
-                  onClick={e => {
-                    e.preventDefault();
-                    setFilter(type);
-                  }}
-                >
-                  {type.charAt(0).toUpperCase() + type.slice(1)}
-                </a>
-              ))}
-            </nav>
-
-            <button
-              type="button"
-              className="todoapp__clear-completed"
-              data-cy="ClearCompletedButton"
-              disabled={!todos.some(todo => todo.completed)}
-            >
-              Clear completed
-            </button>
-          </footer>
+          <Footer todos={todos} filter={filter} onFilterChange={setFilter} />
         )}
       </div>
 
@@ -123,11 +74,6 @@ export const App: React.FC = () => {
           onClick={() => setErrorMessage('')}
         />
         {errorMessage}
-        {/*   show only one message at a time
-        Title should not be empty
-        Unable to add a todo
-        Unable to delete a todo
-        Unable to update a todo */}
       </div>
     </div>
   );
